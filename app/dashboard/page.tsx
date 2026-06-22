@@ -2,7 +2,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 import { Patient } from "@/app/types/index";
 import {
   DashboardHeader,
@@ -15,11 +17,16 @@ import { calculateAge } from "@/lib/utils";
 import { deletePatient } from "@/lib/watermelon/actions";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { doctor, loading } = useCurrentDoctor();
+
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const PAGE_SIZE = 15;
 
   const watermelonPatients = usePatients(search);
+
+
 
   // Map to the UI expected type
   const filtered: Patient[] = watermelonPatients.map((p) => ({

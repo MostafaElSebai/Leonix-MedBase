@@ -1,6 +1,6 @@
 {
-  "name": "Noor Helwan Hospital",
-  "short_name": "Noor Helwan Hospital",
+  "name": "Leonix MedBase",
+  "short_name": "Leonix MedBase",
   "description": "Offline-first patient record management",
   "start_url": "/",
   "display": "standalone",

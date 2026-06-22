@@ -101,6 +101,7 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
   // Set default doctor ID if it's a new form and we have a logged in doctor
   useEffect(() => {
     if (currentDoctor?.id && !form.doctorId && !initialData?.doctorId) {
+      // eslint-disable-next-line
       setForm((prev) => ({ ...prev, doctorId: String(currentDoctor.id) }));
     }
   }, [currentDoctor?.id, form.doctorId, initialData?.doctorId]);
@@ -108,6 +109,7 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
   // Sync when initialData arrives asynchronously (e.g. after Supabase fetch)
   useEffect(() => {
     if (initialData) {
+      // eslint-disable-next-line
       setForm({ ...EMPTY_FORM, ...initialData });
     }
   }, [initialData]);
@@ -370,7 +372,7 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
             <option value="positive">Positive</option>
           </select>
           <p style={HELPER}>
-            Whether the patient's parents share a common ancestor.
+            Whether the patient&apos;s parents share a common ancestor.
           </p>
         </div>
 

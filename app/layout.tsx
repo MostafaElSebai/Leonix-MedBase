@@ -17,8 +17,11 @@ export const metadata: Metadata = {
   title: "Leonix-MedBase",
   description: "Offline-first patient record management",
   manifest: "/manifest.json",
-  themeColor: "#ffffff",
 };
+
+export const viewport = {
+  themeColor: '#ffffff',
+}
 
 export default function RootLayout({
   children,

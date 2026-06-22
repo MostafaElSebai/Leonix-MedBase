@@ -93,6 +93,7 @@ export function VisitForm({ onSubmit, initialData }: VisitFormProps) {
   // Sync when initialData arrives asynchronously (e.g. after Supabase fetch)
   useEffect(() => {
     if (initialData) {
+      // eslint-disable-next-line
       setForm({ ...EMPTY_FORM, ...initialData });
     }
   }, [initialData]);

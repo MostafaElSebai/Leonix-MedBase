@@ -67,7 +67,7 @@ export function VisitTable({ visits, onDelete }: VisitTableProps) {
         </svg>
         <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>No visits recorded</p>
         <p style={{ margin: "0.375rem 0 0", fontSize: "0.875rem" }}>
-          Use "Add Visit" to record this patient's first visit.
+          Use &quot;Add Visit&quot; to record this patient&apos;s first visit.
         </p>
       </div>
     );
