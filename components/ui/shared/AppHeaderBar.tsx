@@ -1,14 +1,18 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 import { SyncButton } from "@/components/ui/shared/SyncButton";
+import { supabase } from "@/lib/supabase/db";
 
 interface AppHeaderBarProps {
   /** Page title shown in the header */
   title: string;
   /** Label for the back button. Defaults to "Back". */
   backLabel?: string;
+  /** Explicit structural URL to go 'up' a level. Avoids history traps. */
+  backHref?: string;
   /**
    * Right-side action slot — pass your primary action button here.
    * The doctor identity is always shown automatically.
@@ -26,6 +30,7 @@ interface AppHeaderBarProps {
 export function AppHeaderBar({
   title,
   backLabel = "Back",
+  backHref,
   children,
   bottomBanner,
 }: AppHeaderBarProps) {
@@ -67,28 +72,88 @@ export function AppHeaderBar({
         >
           {pathname !== "/dashboard" && (
             <>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => router.push("/dashboard")}
-                aria-label="Back to Dashboard"
-                title="Back to Dashboard"
-                style={{ flexShrink: 0, gap: "0.375rem" }}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              {backHref !== "/dashboard" && (
+                <>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => router.push("/dashboard")}
+                    aria-label="Back to Dashboard"
+                    title="Back to Dashboard"
+                    style={{ flexShrink: 0, gap: "0.375rem" }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span>Dashboard</span>
+                  </button>
+
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      width: "1px",
+                      height: "1.25rem",
+                      backgroundColor: "var(--color-border)",
+                      flexShrink: 0,
+                    }}
+                  />
+                </>
+              )}
+
+              {backHref ? (
+                <Link
+                  href={backHref}
+                  className="btn btn-ghost btn-sm"
+                  aria-label={`Go back to ${backLabel}`}
+                  style={{ flexShrink: 0, gap: "0.375rem", textDecoration: "none" }}
                 >
-                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span>Dashboard</span>
-              </button>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  <span>{backLabel}</span>
+                </Link>
+              ) : (
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => router.back()}
+                  aria-label={`Go back — ${backLabel}`}
+                  style={{ flexShrink: 0, gap: "0.375rem" }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  <span>{backLabel}</span>
+                </button>
+              )}
 
               <div
                 aria-hidden="true"
@@ -101,38 +166,6 @@ export function AppHeaderBar({
               />
             </>
           )}
-
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => router.back()}
-            aria-label={`Go back — ${backLabel}`}
-            style={{ flexShrink: 0, gap: "0.375rem" }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-            <span>{backLabel}</span>
-          </button>
-
-          <div
-            aria-hidden="true"
-            style={{
-              width: "1px",
-              height: "1.25rem",
-              backgroundColor: "var(--color-border)",
-              flexShrink: 0,
-            }}
-          />
 
           <h1
             style={{
@@ -219,6 +252,32 @@ export function AppHeaderBar({
           </div>
 
           <SyncButton />
+
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            className="btn btn-ghost btn-sm"
+            aria-label="Log out"
+            title="Log out"
+            style={{ color: "var(--color-text-muted)", padding: "0.375rem" }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
 
           {/* Divider before action slot (only shown when children exist) */}
           {children && (

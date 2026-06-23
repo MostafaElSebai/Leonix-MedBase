@@ -56,12 +56,12 @@ export default function PatientProfilePage() {
   };
 
   const visits: Visit[] = visitsData.map((v: any) => ({
-    id: v.id,
+    id: v.visit.id,
     patientId: patientId,
-    visitDate: new Date(v.createdAt).toISOString().split('T')[0], // Simplified since visitDate wasn't explicitly stored, using created_at
-    doctorName: "Doctor", // We fetch this inside the component or we can fetch earlier.
-    labs: v.labs,
-    treatment: v.treatment,
+    visitDate: new Date(v.visit.createdAt).toISOString().split('T')[0], // Simplified since visitDate wasn't explicitly stored, using created_at
+    doctorName: v.doctorName || "—",
+    labs: v.visit.labs,
+    treatment: v.visit.treatment,
   }));
 
   const handleDeletePatient = async () => {

@@ -43,7 +43,7 @@ export default function EditPatientPage() {
   const handleSave = async (data: NewPatientFormData) => {
     try {
       await updatePatient(patientId, data);
-      router.push(`/patients/${patientId}`);
+      router.replace(`/patients/${patientId}`);
     } catch (err) {
       console.error("Failed to update patient", err);
       alert("Failed to update patient. Please try again.");
@@ -52,7 +52,12 @@ export default function EditPatientPage() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-app)" }}>
-      <NewPatientHeader title="Edit Patient" saveLabel="Save Changes" formId="patient-form" />
+      <NewPatientHeader 
+        title="Edit Patient" 
+        saveLabel="Save Changes" 
+        backHref={`/patients/${patientId}`}
+        formId="patient-form" 
+      />
 
       <main>
         {error ? (

@@ -63,18 +63,7 @@ const LABEL: React.CSSProperties = {
   color: "#334155",
 };
 
-const READONLY_VALUE: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "0.75rem 1rem",
-  fontSize: "1rem",
-  fontWeight: 600,
-  color: "var(--color-brand)",
-  backgroundColor: "#F1F5F9",
-  border: "1px solid var(--color-border)",
-  borderRadius: "var(--radius-input)",
-  minHeight: "44px",
-};
+
 
 const HELPER: React.CSSProperties = {
   fontSize: "0.8125rem",
@@ -116,6 +105,23 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
 
   const age = form.dob ? calculateAge(form.dob) : null;
 
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!val) {
+      setForm((prev) => ({ ...prev, dob: "" }));
+      return;
+    }
+
+    const ageValue = parseInt(val, 10);
+    if (!isNaN(ageValue) && ageValue >= 0) {
+      const today = new Date();
+      const birthYear = today.getFullYear() - ageValue;
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      setForm((prev) => ({ ...prev, dob: `${birthYear}-${month}-${day}` }));
+    }
+  };
+
   const set = (field: keyof NewPatientFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -125,11 +131,31 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
     onSubmit?.(form);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter" && !e.isDefaultPrevented()) {
+      const target = e.target as HTMLElement;
+      const tagName = target.tagName.toLowerCase();
+      // Allow Enter to work naturally in textareas and buttons
+      if (tagName !== "textarea" && tagName !== "button") {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const elements = Array.from(form.elements) as HTMLElement[];
+        const focusable = elements.filter(
+          (el) => !el.hasAttribute("disabled") && el.tabIndex >= 0 && el.tagName !== "FIELDSET"
+        );
+        const index = focusable.indexOf(target);
+        if (index > -1 && index < focusable.length - 1) {
+          focusable[index + 1].focus();
+        }
+      }
+    }
+  };
+
   return (
     <form
       id="patient-form"
       onSubmit={handleSubmit}
-      noValidate
+      onKeyDown={handleKeyDown}
       style={{
         maxWidth: "42rem",
         margin: "0 auto",
@@ -199,18 +225,25 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
                 id="patient-dob"
                 className="form-input"
                 value={form.dob}
-                onChange={(val) => setForm(f => ({...f, dob: val}))}
+                onChange={(val) => setForm(f => ({ ...f, dob: val }))}
                 required
               />
             </div>
 
             <div style={{ ...FIELD_WRAPPER, minWidth: "7rem" }}>
-              <label style={LABEL} aria-label="Calculated age">
+              <label htmlFor="patient-age" style={LABEL}>
                 Age
               </label>
-              <div style={READONLY_VALUE} role="status" aria-live="polite">
-                {age !== null ? (age === -1 ? "❌ Invalid" : `${age} yrs`) : "—"}
-              </div>
+              <input
+                id="patient-age"
+                type="number"
+                className="form-input"
+                value={age !== null && age !== -1 ? age : ""}
+                onChange={handleAgeChange}
+                placeholder="e.g. 30"
+                min="0"
+                max="100"
+              />
             </div>
           </div>
 
@@ -289,7 +322,7 @@ export function NewPatientForm({ onSubmit, initialData }: NewPatientFormProps) {
               id="patient-first-visit"
               className="form-input"
               value={form.firstVisitDate}
-              onChange={(val) => setForm(f => ({...f, firstVisitDate: val}))}
+              onChange={(val) => setForm(f => ({ ...f, firstVisitDate: val }))}
               required
             />
           </div>

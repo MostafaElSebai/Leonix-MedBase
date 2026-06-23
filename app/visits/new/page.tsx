@@ -45,7 +45,7 @@ function NewVisitContent() {
     if (!patientId || !doctor?.id) return;
     try {
       await createVisit(patientId, String(doctor.id), data);
-      router.push(`/patients/${patientId}`);
+      router.replace(`/patients/${patientId}`);
     } catch (err) {
       console.error("Failed to create visit", err);
       alert("Failed to create visit. Please try again.");
@@ -54,7 +54,12 @@ function NewVisitContent() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-app)" }}>
-      <VisitHeader title="New Visit" saveLabel="Save Visit" formId="visit-form" />
+      <VisitHeader 
+        title="New Visit" 
+        saveLabel="Save Visit" 
+        backHref={patientId ? `/patients/${patientId}` : "/dashboard"}
+        formId="visit-form" 
+      />
       <main>
         {doctorLoading ? (
           <FormSkeleton />

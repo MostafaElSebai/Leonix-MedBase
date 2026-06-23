@@ -3,13 +3,13 @@ import { supabase } from "@/lib/supabase/db";
 import { Doctor } from "@/app/types/index";
 
 interface UseCurrentDoctorResult {
-  doctor: Pick<Doctor, "id" | "name" | "email"> | null;
+  doctor: Pick<Doctor, "id" | "name" | "email" | "pin"> | null;
   loading: boolean;
   error: string;
 }
 
 export function useCurrentDoctor(): UseCurrentDoctorResult {
-  const [doctor, setDoctor] = useState<Pick<Doctor, "id" | "name" | "email"> | null>(null);
+  const [doctor, setDoctor] = useState<Pick<Doctor, "id" | "name" | "email" | "pin"> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,7 +40,7 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
       // Step 2: Fetch the matching doctor row
       const { data, error: dbError } = await supabase
         .from("doctors")
-        .select("id, name, email")
+        .select("id, name, email, pin")
         .eq("email", email)
         .single();
 
@@ -50,7 +50,7 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
         return;
       }
 
-      setDoctor(data as Pick<Doctor, "id" | "name" | "email">);
+      setDoctor(data as Pick<Doctor, "id" | "name" | "email" | "pin">);
       setLoading(false);
     };
 

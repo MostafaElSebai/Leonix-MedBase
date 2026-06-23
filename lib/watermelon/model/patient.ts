@@ -1,8 +1,12 @@
 import { Model } from '@nozbe/watermelondb';
-import { text, readonly, date, children } from '@nozbe/watermelondb/decorators';
+import { text, readonly, date, children, relation } from '@nozbe/watermelondb/decorators';
 
 export default class Patient extends Model {
   static table = 'patients';
+  static associations = {
+    visits: { type: 'has_many', foreignKey: 'patient_id' },
+    doctors: { type: 'belongs_to', key: 'doctor_id' },
+  } as const;
 
   @text('sync_status') dbSyncStatus!: string;
   @text('name') name!: string;
@@ -17,6 +21,8 @@ export default class Patient extends Model {
   @text('consanguinity') consanguinity!: string;
   @text('notes') notes?: string;
   @text('doctor_id') doctorId!: string;
+
+  @relation('doctors', 'doctor_id') assignedDoctor!: any;
 
   @readonly @date('created_at') createdAt!: number;
   @readonly @date('updated_at') updatedAt!: number;

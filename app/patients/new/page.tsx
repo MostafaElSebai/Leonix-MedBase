@@ -13,7 +13,7 @@ export default function NewPatientPage() {
   const handleSave = async (data: NewPatientFormData) => {
     try {
       const newPatient = await createPatient(data);
-      router.push(`/patients/${newPatient.id}`);
+      router.replace(`/patients/${newPatient.id}`);
     } catch (error) {
       console.error("Failed to create patient", error);
       alert("Failed to save patient. Please try again.");
@@ -22,7 +22,7 @@ export default function NewPatientPage() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-app)" }}>
-      <NewPatientHeader formId="patient-form" />
+      <NewPatientHeader backHref="/dashboard" formId="patient-form" />
       <main>
         {doctorLoading ? <PatientFormSkeleton /> : <NewPatientForm onSubmit={handleSave} />}
       </main>

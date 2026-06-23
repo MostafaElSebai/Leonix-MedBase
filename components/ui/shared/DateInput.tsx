@@ -1,197 +1,149 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface DateInputProps {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
+  required?: boolean;
+  className?: string;
 }
 
-export function DateInput({ value, onChange, ...props }: DateInputProps) {
-  const [text, setText] = useState("");
-  const lastReportedValue = useRef<string>(value);
+export function DateInput({ id, value, onChange, required, className }: DateInputProps) {
+  const dayRef = useRef<HTMLInputElement>(null);
+  const monthRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
 
-  // Sync incoming YYYY-MM-DD to DD/MM/YYYY text ONLY if changed from outside
+  // Parse incoming value (assuming YYYY-MM-DD or similar)
+  const parts = value ? value.split('-') : [];
+  const initialYear = parts[0] || '';
+  const initialMonth = parts[1] || '';
+  const initialDay = parts[2] || '';
+
+  const [day, setDay] = useState(initialDay);
+  const [month, setMonth] = useState(initialMonth);
+  const [year, setYear] = useState(initialYear);
+
+  // Sync from props in case form is reset or changed externally (like typing in "Age")
   useEffect(() => {
-    if (value !== lastReportedValue.current) {
-      if (value) {
-        const parts = value.split("-");
-        if (parts.length === 3) {
-          // eslint-disable-next-line
-          setText(`${parts[2]}/${parts[1]}/${parts[0]}`);
-        } else {
-          // eslint-disable-next-line
-          setText(value); // Fallback
-        }
-      } else {
-        // eslint-disable-next-line
-        setText("");
-      }
-      lastReportedValue.current = value;
-    }
-  }, [value]);
+    const p = value ? value.split('-') : [];
+    // Only update local state if it differs from the parsed value, 
+    // to prevent cursor jumping or interfering with typing.
+    if (p[0] !== undefined && p[0] !== year) setYear(p[0]);
+    if (p[1] !== undefined && p[1] !== month) setMonth(p[1].replace(/^0+/, ''));
+    if (p[2] !== undefined && p[2] !== day) setDay(p[2].replace(/^0+/, ''));
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const triggerChange = (newVal: string) => {
-    lastReportedValue.current = newVal;
-    onChange(newVal);
+  const handleDay = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 2);
+    setDay(v);
+    update(year, month, v);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
+  const handleMonth = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 2);
+    setMonth(v);
+    update(year, v, day);
+  };
 
-    // Allow clearing completely
-    if (!input) {
-      setText("");
-      triggerChange("");
-      return;
-    }
+  const handleYear = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setYear(v);
+    update(v, month, day);
+  };
 
-    // If user is deleting (backspace), just allow it without re-formatting immediately
-    if (input.length < text.length) {
-      setText(input);
-      triggerChange("");
-      return;
-    }
-
-    // User is typing/pasting
-    const digits = input.replace(/\D/g, "");
-    const chars = digits.split("");
-    let res = "";
-
-    // Helper to find 19XX or 20XX anchor
-    const extractDMY = (dStr: string) => {
-      let yIdx = -1;
-      for (let i = 2; i <= 4; i++) {
-        if (i + 1 < dStr.length || i + 1 === dStr.length) {
-          const sub = dStr.slice(i, i + 2);
-          if (sub === "19" || sub === "20") {
-            yIdx = i;
-            break;
-          }
-        }
-      }
-
-      if (yIdx !== -1) {
-        const dm = dStr.slice(0, yIdx);
-        const y = dStr.slice(yIdx);
-        
-        if (dm.length === 2) {
-          const d = parseInt(dm[0]);
-          const m = parseInt(dm[1]);
-          if (d >= 1 && d <= 31 && m >= 1 && m <= 12) return { d: dm[0], m: dm[1], y };
-        } else if (dm.length === 3) {
-          const d1 = parseInt(dm.slice(0, 2)), m1 = parseInt(dm.slice(2, 3));
-          const v1 = d1 >= 1 && d1 <= 31 && m1 >= 1 && m1 <= 12;
-          const d2 = parseInt(dm.slice(0, 1)), m2 = parseInt(dm.slice(1, 3));
-          const v2 = d2 >= 1 && d2 <= 31 && m2 >= 1 && m2 <= 12;
-          
-          if (v1 && !v2) return { d: dm.slice(0, 2), m: dm.slice(2, 3), y };
-          if (!v1 && v2) return { d: dm.slice(0, 1), m: dm.slice(1, 3), y };
-          if (v1 && v2) return { d: dm.slice(0, 2), m: dm.slice(2, 3), y }; // prefer DD M
-        } else if (dm.length === 4) {
-          const d = parseInt(dm.slice(0, 2)), m = parseInt(dm.slice(2, 4));
-          if (d >= 1 && d <= 31 && m >= 1 && m <= 12) return { d: dm.slice(0, 2), m: dm.slice(2, 4), y };
-        }
-      }
-      return null;
-    };
-
-    const parsed = extractDMY(digits);
-    if (parsed) {
-      let { d, m } = parsed;
-      const { y } = parsed;
-      if (d.length === 1) d = "0" + d;
-      if (m.length === 1) m = "0" + m;
-      res = `${d}/${m}/${y}`;
+  const update = (y: string, m: string, d: string) => {
+    if (!y && !m && !d) {
+      onChange("");
     } else {
-      // Fallback: Greedy left-to-right logic
-      // Day
-      if (chars.length > 0) {
-        const d1 = parseInt(chars[0]);
-        if (d1 > 3) {
-          res += "0" + chars[0] + "/";
-          chars.shift();
-        } else if (chars.length > 1) {
-          const d2 = parseInt(chars[1]);
-          if (d1 === 3 && d2 > 1) {
-            res += "03/";
-            chars.shift();
-          } else if (d1 === 0 && d2 === 0) {
-            res += "01/";
-            chars.splice(0, 2);
-          } else {
-            res += chars[0] + chars[1] + "/";
-            chars.splice(0, 2);
-          }
-        } else {
-          res += chars[0];
-          chars.shift();
-        }
-      }
-
-      // Month
-      if (chars.length > 0) {
-        const m1 = parseInt(chars[0]);
-        if (m1 > 1) {
-          res += "0" + chars[0] + "/";
-          chars.shift();
-        } else if (chars.length > 1) {
-          const m2 = parseInt(chars[1]);
-          if (m1 === 1 && m2 > 2) {
-            res += "01/";
-            chars.shift();
-          } else if (m1 === 0 && m2 === 0) {
-            res += "01/";
-            chars.splice(0, 2);
-          } else {
-            res += chars[0] + chars[1] + "/";
-            chars.splice(0, 2);
-          }
-        } else {
-          res += chars[0];
-          chars.shift();
-        }
-      }
-
-      // Year
-      if (chars.length > 0) {
-        res += chars.slice(0, 4).join("");
-      }
-
-      // Support manual slash typing for early padding
-      if (input.endsWith("/")) {
-        if (digits.length === 1) {
-          res = "0" + digits[0] + "/";
-        } else if (digits.length === 3) {
-          res = res.slice(0, 3) + "0" + digits[2] + "/";
-        }
-      }
+      const paddedMonth = m ? m.padStart(2, '0') : '01';
+      const paddedDay = d ? d.padStart(2, '0') : '01';
+      onChange(`${y}-${paddedMonth}-${paddedDay}`);
     }
+  };
 
-    setText(res);
-    
-    // If we have a full date, convert back to YYYY-MM-DD for the parent form state
-    if (res.length === 10) {
-      const [dd, mm, yyyy] = res.split("/");
-      const d = new Date(`${yyyy}-${mm}-${dd}`);
-      if (!isNaN(d.getTime())) {
-        triggerChange(`${yyyy}-${mm}-${dd}`);
-      } else {
-        triggerChange("");
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    field: "day" | "month" | "year"
+  ) => {
+    const target = e.currentTarget;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (field === "day") monthRef.current?.focus();
+      else if (field === "month") yearRef.current?.focus();
+      else {
+        const form = target.form;
+        if (form) {
+          const elements = Array.from(form.elements) as HTMLElement[];
+          const focusable = elements.filter(
+            (el) => !el.hasAttribute("disabled") && el.tabIndex >= 0 && el.tagName !== "FIELDSET"
+          );
+          const index = focusable.indexOf(target);
+          if (index > -1 && index < focusable.length - 1) {
+            focusable[index + 1].focus();
+          }
+        }
       }
-    } else {
-      triggerChange("");
+    } else if (e.key === "ArrowRight") {
+      if (target.selectionStart === target.value.length) {
+        e.preventDefault();
+        if (field === "day") monthRef.current?.focus();
+        else if (field === "month") yearRef.current?.focus();
+      }
+    } else if (e.key === "ArrowLeft") {
+      if (target.selectionStart === 0) {
+        e.preventDefault();
+        if (field === "month") dayRef.current?.focus();
+        else if (field === "year") monthRef.current?.focus();
+      }
     }
   };
 
   return (
-    <input
-      type="text"
-      inputMode="numeric"
-      placeholder="DD/MM/YYYY"
-      value={text}
-      onChange={handleChange}
-      {...props}
-    />
+    <div 
+      className={className} 
+      style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        gap: "0.25rem", 
+        width: "100%", 
+        padding: "0 0.5rem" 
+      }}
+    >
+      <input
+        id={id}
+        ref={dayRef}
+        type="text"
+        placeholder="DD"
+        value={day}
+        onChange={handleDay}
+        onKeyDown={(e) => handleKeyDown(e, "day")}
+        required={required}
+        style={{ flex: 1, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%", padding: "0.75rem 0" }}
+      />
+      <span style={{ color: "var(--color-text-muted)", fontWeight: "bold" }}>/</span>
+      <input
+        ref={monthRef}
+        type="text"
+        placeholder="MM"
+        value={month}
+        onChange={handleMonth}
+        onKeyDown={(e) => handleKeyDown(e, "month")}
+        required={required}
+        style={{ flex: 1, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%", padding: "0.75rem 0" }}
+      />
+      <span style={{ color: "var(--color-text-muted)", fontWeight: "bold" }}>/</span>
+      <input
+        ref={yearRef}
+        type="text"
+        placeholder="YYYY"
+        value={year}
+        onChange={handleYear}
+        onKeyDown={(e) => handleKeyDown(e, "year")}
+        required={required}
+        style={{ flex: 1.5, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%", padding: "0.75rem 0" }}
+      />
+    </div>
   );
 }

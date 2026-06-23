@@ -1,18 +1,18 @@
-// Edit existing visit — /visits/[visitId]/edit
+// View visit details — /visits/[visitId]
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
 import { useVisitById } from "@/hooks/useVisitById";
-import { VisitHeader, VisitForm, VisitFormData } from "@/components/ui/visits";
-import { updateVisit, deleteVisit } from "@/lib/watermelon/actions";
+import { VisitViewHeader, VisitViewCard } from "@/components/ui/visits/view";
+import { deleteVisit } from "@/lib/watermelon/actions";
 
 // ── Skeleton ────────────────────────────────────────────────────────────────
 
-function FormSkeleton() {
+function ViewSkeleton() {
   return (
     <div
       style={{
-        maxWidth: "42rem",
+        maxWidth: "48rem",
         margin: "0 auto",
         padding: "2rem 1.5rem",
         display: "flex",
@@ -20,11 +20,11 @@ function FormSkeleton() {
         gap: "1.5rem",
       }}
     >
-      {[56, 80, 100, 80, 80, 80, 100, 56, 56, 80].map((h, i) => (
+      {[100, 150, 150, 150].map((h, i) => (
         <div
           key={i}
           className="skeleton"
-          style={{ height: `${h}px`, borderRadius: "var(--radius-input)" }}
+          style={{ height: `${h}px`, borderRadius: "var(--radius-card)" }}
         />
       ))}
     </div>
@@ -33,34 +33,20 @@ function FormSkeleton() {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default function EditVisitPage() {
+export default function ViewVisitPage() {
   const params = useParams();
   const visitId = params?.visitId as string;
   const router = useRouter();
 
   const { formData, patientId, loading, error } = useVisitById(visitId);
 
-  const handleSave = async (data: VisitFormData) => {
-    try {
-      await updateVisit(visitId, data);
-      if (patientId) {
-        router.replace(`/patients/${patientId}`);
-      } else {
-        router.replace("/dashboard");
-      }
-    } catch (err) {
-      console.error("Failed to update visit", err);
-      alert("Failed to update visit. Please try again.");
-    }
-  };
-
   const handleDelete = async () => {
     try {
       await deleteVisit(visitId);
       if (patientId) {
-        router.replace(`/patients/${patientId}`);
+        router.push(`/patients/${patientId}`);
       } else {
-        router.replace("/dashboard");
+        router.push("/dashboard");
       }
     } catch (err) {
       console.error("Failed to delete visit", err);
@@ -70,18 +56,18 @@ export default function EditVisitPage() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-app)" }}>
-      <VisitHeader 
-        title="Edit Visit" 
-        saveLabel="Save Changes" 
-        backHref={patientId ? `/patients/${patientId}` : "/dashboard"}
+      <VisitViewHeader 
+        visitId={visitId}
+        patientId={patientId ?? ""}
+        visitDate={formData?.visitDate}
+        doctorName={formData?.doctorName}
         onDelete={handleDelete}
-        formId="visit-form"
       />
-      <main>
+      <main style={{ padding: "2rem 1.5rem" }}>
         {error ? (
           <div
             style={{
-              maxWidth: "42rem",
+              maxWidth: "48rem",
               margin: "2rem auto",
               padding: "1.5rem",
               textAlign: "center",
@@ -92,9 +78,9 @@ export default function EditVisitPage() {
             <p style={{ fontSize: "0.875rem", marginTop: "0.375rem" }}>{error}</p>
           </div>
         ) : loading ? (
-          <FormSkeleton />
+          <ViewSkeleton />
         ) : (
-          <VisitForm onSubmit={handleSave} initialData={formData ?? undefined} />
+          <VisitViewCard data={formData ?? {}} />
         )}
       </main>
     </div>

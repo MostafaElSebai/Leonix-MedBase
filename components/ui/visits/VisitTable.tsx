@@ -1,15 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 import { Visit } from "@/app/types/index";
 import { formatDate } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/shared/ConfirmDialog";
-
-interface VisitTableProps {
-  visits: Visit[];
-  onDelete?: (id: string | number) => void;
-}
+import { SortableHeader } from "@/components/ui/shared/SortableHeader";
+import { sortDataByDate } from "@/lib/utils";
 
 const COL_HEADER: React.CSSProperties = {
   padding: "0.75rem 1rem",
@@ -38,9 +36,30 @@ const COL_MUTED: React.CSSProperties = {
   fontSize: "0.875rem",
 };
 
+interface VisitTableProps {
+  visits: Visit[];
+  onDelete?: (id: string | number) => void;
+}
+
 export function VisitTable({ visits, onDelete }: VisitTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | number | null>(null);
+  const { doctor } = useCurrentDoctor();
+
+  // Sorting state
+  const [sortField, setSortField] = useState<keyof Visit | null>("visitDate");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const handleSort = (field: keyof Visit) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("desc");
+    }
+  };
+
+  const sortedVisits = sortDataByDate(visits, sortField, sortOrder, "createdAt");
 
   if (visits.length === 0) {
     return (
@@ -84,7 +103,14 @@ export function VisitTable({ visits, onDelete }: VisitTableProps) {
           <thead>
             <tr>
               <th scope="col" style={COL_HEADER}>#</th>
-              <th scope="col" style={COL_HEADER}>Visit Date</th>
+              <SortableHeader 
+                field="visitDate" 
+                label="Visit Date" 
+                currentSortField={sortField as string} 
+                currentSortOrder={sortOrder} 
+                onSort={handleSort} 
+                style={COL_HEADER} 
+              />
               <th scope="col" style={COL_HEADER}>Doctor</th>
               <th scope="col" style={COL_HEADER}>Labs</th>
               <th scope="col" style={COL_HEADER}>Treatment</th>
@@ -92,13 +118,13 @@ export function VisitTable({ visits, onDelete }: VisitTableProps) {
             </tr>
           </thead>
           <tbody>
-            {visits.map((visit, idx) => (
+            {sortedVisits.map((visit, idx) => (
               <tr
                 key={visit.id}
-                onClick={() => router.push(`/visits/${visit.id}/edit`)}
+                onClick={() => router.push(`/visits/${visit.id}`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && router.push(`/visits/${visit.id}/edit`)}
+                onKeyDown={(e) => e.key === "Enter" && router.push(`/visits/${visit.id}`)}
                 style={{
                   backgroundColor: idx % 2 === 0 ? "var(--color-bg-card)" : "var(--color-bg-app)",
                   transition: "background-color 150ms ease-in-out",
@@ -158,33 +184,60 @@ export function VisitTable({ visits, onDelete }: VisitTableProps) {
 
                 {/* Actions */}
                 <td style={{ ...COL_CELL, textAlign: "center", verticalAlign: "middle" }}>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteId(visit.id);
-                    }}
-                    style={{ color: "var(--color-danger)", padding: "0.25rem", minHeight: "0", height: "auto" }}
-                    aria-label="Delete visit"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/visits/${visit.id}/edit`);
+                      }}
+                      style={{ padding: "0.25rem 0.5rem", minHeight: "0", height: "auto", fontSize: "0.75rem", gap: "0.25rem" }}
+                      aria-label="Edit visit"
                     >
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      <line x1="10" y1="11" x2="10" y2="17" />
-                      <line x1="14" y1="11" x2="14" y2="17" />
-                    </svg>
-                  </button>
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteId(visit.id);
+                      }}
+                      style={{ color: "var(--color-danger)", padding: "0.25rem", minHeight: "0", height: "auto" }}
+                      aria-label="Delete visit"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -199,6 +252,7 @@ export function VisitTable({ visits, onDelete }: VisitTableProps) {
       message="Are you sure you want to delete this visit? This action cannot be undone."
       confirmLabel="Delete"
       cancelLabel="Cancel"
+      requirePin={doctor?.pin}
       onConfirm={() => {
         if (deleteId !== null) {
           onDelete?.(deleteId);

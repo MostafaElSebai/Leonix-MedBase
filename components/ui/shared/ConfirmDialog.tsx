@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   isDestructive?: boolean;
+  requirePin?: string;
 }
 
 export function ConfirmDialog({
@@ -22,10 +23,14 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   isDestructive = false,
+  requirePin,
 }: ConfirmDialogProps) {
+  const [pinInput, setPinInput] = useState("");
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setPinInput(""); // Reset PIN input when dialog opens
     } else {
       document.body.style.overflow = "";
     }
@@ -34,18 +39,25 @@ export function ConfirmDialog({
     };
   }, [isOpen]);
 
-  // Handle Escape key
+  // Handle Escape and Enter keys
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (!isOpen) return;
+      if (e.key === "Escape") {
         onCancel();
+      } else if (e.key === "Enter") {
+        if (!requirePin || pinInput === requirePin) {
+          onConfirm();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onCancel]);
+  }, [isOpen, onCancel, onConfirm, requirePin, pinInput]);
 
   if (!isOpen) return null;
+
+  const isConfirmDisabled = !!requirePin && pinInput !== requirePin;
 
   return (
     <div
@@ -99,10 +111,41 @@ export function ConfirmDialog({
               fontSize: "0.875rem",
               color: "var(--color-text-muted)",
               lineHeight: 1.5,
+              marginBottom: requirePin ? "1rem" : 0,
             }}
           >
             {message}
           </p>
+
+          {requirePin && (
+            <div style={{ marginTop: "1rem" }}>
+              <label 
+                htmlFor="dialog-pin" 
+                style={{ 
+                  display: "block", 
+                  fontSize: "0.75rem", 
+                  fontWeight: 600, 
+                  color: "var(--color-text-primary)", 
+                  marginBottom: "0.375rem" 
+                }}
+              >
+                Enter your PIN to confirm:
+              </label>
+              <input
+                id="dialog-pin"
+                type="password"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                autoFocus
+                className="form-input"
+                placeholder="••••"
+                style={{ 
+                  letterSpacing: pinInput ? "0.5em" : "normal",
+                  fontFamily: pinInput ? "monospace" : "inherit"
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div
@@ -124,10 +167,20 @@ export function ConfirmDialog({
           <button
             className="btn btn-primary btn-sm"
             onClick={onConfirm}
+            disabled={isConfirmDisabled}
             style={
               isDestructive
-                ? { backgroundColor: "var(--color-danger)", color: "white", border: "none" }
-                : undefined
+                ? { 
+                    backgroundColor: isConfirmDisabled ? "var(--color-border)" : "var(--color-danger)", 
+                    color: "white", 
+                    border: "none",
+                    cursor: isConfirmDisabled ? "not-allowed" : "pointer",
+                    opacity: isConfirmDisabled ? 0.6 : 1
+                  }
+                : {
+                    cursor: isConfirmDisabled ? "not-allowed" : "pointer",
+                    opacity: isConfirmDisabled ? 0.6 : 1
+                  }
             }
           >
             {confirmLabel}

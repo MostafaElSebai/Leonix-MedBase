@@ -5,14 +5,19 @@ import { AppHeaderBar } from "@/components/ui/shared/AppHeaderBar";
 interface NewPatientHeaderProps {
   title?: string;
   saveLabel?: string;
+  backHref?: string;
   onSave?: () => void;
   isSaving?: boolean;
   formId?: string;
 }
 
-export function NewPatientHeader({ title = "New Patient", saveLabel = "Save Patient", onSave, isSaving = false, formId }: NewPatientHeaderProps) {
+export function NewPatientHeader({ title = "New Patient", saveLabel = "Save Patient", backHref, onSave, isSaving = false, formId }: NewPatientHeaderProps) {
   return (
-    <AppHeaderBar title={title}>
+    <AppHeaderBar 
+      title={title}
+      backLabel="Cancel"
+      backHref={backHref}
+    >
       <button
         type={formId ? "submit" : "button"}
         form={formId}

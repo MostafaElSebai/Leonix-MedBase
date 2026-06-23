@@ -19,7 +19,7 @@ export type Patient = {
   address?: string;
   age?: number;
   lastVisitDate?: string;
-  lastVisitDoctor?: string;
+  assignedDoctorName?: string;
 };
 
 export type Visit = {

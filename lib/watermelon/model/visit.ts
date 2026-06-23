@@ -3,6 +3,10 @@ import { text, readonly, date, relation } from '@nozbe/watermelondb/decorators';
 
 export default class Visit extends Model {
   static table = 'visits';
+  static associations = {
+    patients: { type: 'belongs_to', key: 'patient_id' },
+    doctors: { type: 'belongs_to', key: 'doctor_id' },
+  } as const;
 
   @text('sync_status') dbSyncStatus!: string;
   @text('complaint') complaint!: string;

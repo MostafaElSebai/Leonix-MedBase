@@ -35,6 +35,7 @@ export function useVisitById(visitId: string): UseVisitByIdResult {
         setPatientId(visit.patient.id);
 
         setFormData({
+          visitDate:     new Date(visit.createdAt).toISOString(),
           doctorName:    doctor?.name          ?? "",
           complain:      visit.complaint       ?? "",
           drugs:         visit.drugs           ?? "",

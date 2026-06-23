@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { DateInput } from "@/components/ui/shared/DateInput";
-
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface VisitFormData {
+  visitDate?: string;
   doctorName: string;
   complain: string;
   drugs: string;
@@ -274,11 +274,12 @@ export function VisitForm({ onSubmit, initialData }: VisitFormProps) {
             <label htmlFor="visit-nv-date" style={LABEL}>
               Next Visit Date
             </label>
-            <DateInput
+            <input
               id="visit-nv-date"
+              type="date"
               className="form-input"
               value={form.nextVisitDate}
-              onChange={(val) => setForm(f => ({...f, nextVisitDate: val}))}
+              onChange={set("nextVisitDate")}
             />
           </div>
 

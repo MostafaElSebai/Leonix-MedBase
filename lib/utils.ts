@@ -61,3 +61,37 @@ export function formatDate(dateStr?: string | null): string {
   const year  = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
+
+/**
+ * Sorts an array of objects by a date field.
+ * Handles missing dates and empty values safely.
+ */
+export function sortDataByDate<T>(
+  data: T[],
+  sortField: keyof T | null,
+  sortOrder: "asc" | "desc",
+  fallbackField?: string
+): T[] {
+  if (!sortField) return data;
+
+  return [...data].sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+
+    if (!aVal && fallbackField) aVal = (a as any)[fallbackField];
+    if (!bVal && fallbackField) bVal = (b as any)[fallbackField];
+
+    if (!aVal && !bVal) return 0;
+    if (!aVal) return 1; // empty goes to bottom
+    if (!bVal) return -1;
+
+    const dateA = new Date(aVal as string).getTime();
+    const dateB = new Date(bVal as string).getTime();
+
+    if (isNaN(dateA) && isNaN(dateB)) return 0;
+    if (isNaN(dateA)) return 1;
+    if (isNaN(dateB)) return -1;
+
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+}

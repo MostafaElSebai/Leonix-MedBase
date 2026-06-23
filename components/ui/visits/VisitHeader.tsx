@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { AppHeaderBar } from "@/components/ui/shared/AppHeaderBar";
 import { ConfirmDialog } from "@/components/ui/shared/ConfirmDialog";
+import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 
 interface VisitHeaderProps {
   title?: string;
   saveLabel?: string;
+  backHref?: string;
   onSave?: () => void;
   onDelete?: () => void;
   isSaving?: boolean;
@@ -16,16 +18,22 @@ interface VisitHeaderProps {
 export function VisitHeader({
   title = "New Visit",
   saveLabel = "Save Visit",
+  backHref,
   onSave,
   onDelete,
   isSaving = false,
   formId,
 }: VisitHeaderProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const { doctor } = useCurrentDoctor();
 
   return (
     <>
-    <AppHeaderBar title={title}>
+    <AppHeaderBar 
+      title={title}
+      backLabel="Cancel"
+      backHref={backHref}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
         {onDelete && (
           <button
@@ -47,7 +55,7 @@ export function VisitHeader({
               aria-hidden="true"
             >
               <path d="M3 6h18" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2" />
               <line x1="10" y1="11" x2="10" y2="17" />
               <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
@@ -94,6 +102,7 @@ export function VisitHeader({
       message="Are you sure you want to delete this visit? This action cannot be undone."
       confirmLabel="Delete"
       cancelLabel="Cancel"
+      requirePin={doctor?.pin}
       onConfirm={() => {
         setShowConfirm(false);
         onDelete?.();

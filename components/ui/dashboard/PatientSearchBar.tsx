@@ -3,9 +3,10 @@
 interface PatientSearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
 }
 
-export function PatientSearchBar({ value, onChange }: PatientSearchBarProps) {
+export function PatientSearchBar({ value, onChange, placeholder }: PatientSearchBarProps) {
   return (
     <div style={{ position: "relative" }}>
       <div
@@ -38,7 +39,7 @@ export function PatientSearchBar({ value, onChange }: PatientSearchBarProps) {
       <input
         type="search"
         className="form-input"
-        placeholder="Search by name, phone, or address…"
+        placeholder={placeholder || "Search by name, phone, or address…"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Search patients"
