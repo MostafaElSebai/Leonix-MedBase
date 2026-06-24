@@ -57,23 +57,43 @@ function mapWatermelonToRow(row: any) {
 }
 
 async function pullTable(supabase: any, tableName: string, lastPulledAt: number) {
-  let query = supabase.from(tableName).select("*");
+  let allData: any[] = [];
+  let page = 0;
+  const pageSize = 1000;
   
-  if (lastPulledAt > 0) {
-    const dateIso = new Date(lastPulledAt).toISOString();
-    // Only get rows updated or deleted since last pull
-    query = query.or(`updated_at.gt.${dateIso},deleted_at.gt.${dateIso}`);
-  }
+  while (true) {
+    // Add explicit ordering to ensure stable pagination
+    let query = supabase.from(tableName).select("*").order('id');
+    
+    if (lastPulledAt > 0) {
+      const dateIso = new Date(lastPulledAt).toISOString();
+      // Only get rows updated or deleted since last pull
+      query = query.or(`updated_at.gt.${dateIso},deleted_at.gt.${dateIso}`);
+    }
 
-  const { data, error } = await query;
-  if (error) throw error;
+    // Fetch in pages of 1000 to bypass Supabase's max_rows restriction
+    query = query.range(page * pageSize, (page + 1) * pageSize - 1);
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      allData = allData.concat(data);
+    }
+
+    // If we received less than a full page, we're done
+    if (!data || data.length < pageSize) {
+      break;
+    }
+    page++;
+  }
 
   const created: any[] = [];
   const updated: any[] = [];
   const deleted: string[] = [];
 
-  if (data) {
-    data.forEach((row: any) => {
+  if (allData.length > 0) {
+    allData.forEach((row: any) => {
       if (row.deleted_at) {
         deleted.push(row.id);
       } else if (lastPulledAt > 0 && new Date(row.created_at).getTime() <= lastPulledAt) {
@@ -117,10 +137,10 @@ export async function GET(request: Request) {
 async function pushTable(supabase: any, tableName: string, changes: any) {
   const { created, updated, deleted } = changes;
 
-  // Insert created
+  // Insert created (using upsert for idempotency against network retries)
   if (created && created.length > 0) {
     const rows = created.map(mapWatermelonToRow);
-    const { error } = await supabase.from(tableName).insert(rows);
+    const { error } = await supabase.from(tableName).upsert(rows);
     if (error) throw error;
   }
 

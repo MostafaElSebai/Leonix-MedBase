@@ -10,7 +10,10 @@ export async function proxy(req: NextRequest) {
         cookie.name.startsWith('sb-') && cookie.name.endsWith('-auth-token')
     );
 
-    if (req.nextUrl.pathname.startsWith('/dashboard') && !hasAuthCookie) {
+    const protectedPaths = ['/dashboard', '/patients', '/visits'];
+    const isProtected = protectedPaths.some(path => req.nextUrl.pathname.startsWith(path));
+
+    if (isProtected && !hasAuthCookie) {
         return NextResponse.redirect(new URL('/', req.url));
     }
 
@@ -21,7 +24,6 @@ export async function proxy(req: NextRequest) {
     return res;
 }
 
-
 export const config = {
-    matcher: ['/', '/dashboard/:path*'],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|manifest.json).*)'],
 };

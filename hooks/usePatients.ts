@@ -12,7 +12,12 @@ export type EnhancedPatient = {
   assignedDoctorName?: string;
 };
 
-export function usePatients(searchQuery1: string = "", searchQuery2: string = "", doctorIdFilter: string = "") {
+export function usePatients(
+  searchQuery1: string = "", 
+  searchQuery2: string = "", 
+  doctorIdFilter: string = "",
+  dateFilter: { day: string; month: string; year: string } = { day: "", month: "", year: "" }
+) {
   const [patients, setPatients] = useState<EnhancedPatient[]>([]);
 
   useEffect(() => {
@@ -21,12 +26,15 @@ export function usePatients(searchQuery1: string = "", searchQuery2: string = ""
     const conditions: any[] = [];
 
     const buildCondition = (term: string) => {
-      const safeTerm = `%${term.trim()}%`;
+      // We replace regex special characters with '_' (SQL wildcard) to prevent 
+      // WatermelonDB from crashing on memory regex compilation, while leaving 
+      // Arabic and other non-English characters completely intact.
+      const sanitized = term.trim().replace(/[.*+?^${}()|[\]\\]/g, '_');
+      const safeTerm = `%${sanitized}%`;
       return Q.or(
         Q.where('name', Q.like(safeTerm)),
         Q.where('phone', Q.like(safeTerm)),
-        Q.where('address', Q.like(safeTerm)),
-        Q.where('historical_first_visit', Q.like(safeTerm))
+        Q.where('address', Q.like(safeTerm))
       );
     };
 
@@ -42,12 +50,25 @@ export function usePatients(searchQuery1: string = "", searchQuery2: string = ""
       conditions.push(Q.where('doctor_id', doctorIdFilter));
     }
 
+    if (dateFilter.day || dateFilter.month || dateFilter.year) {
+      const y = dateFilter.year || "%";
+      const m = dateFilter.month || "%";
+      const d = dateFilter.day || "%";
+      // This builds a strict LIKE pattern, e.g., "2024-05-%", "%-05-19", "%-%-19"
+      const datePattern = `${y}-${m}-${d}`;
+      conditions.push(Q.where('historical_first_visit', Q.like(datePattern)));
+    }
+
+    // Default ordering by most recently updated
+    conditions.push(Q.sortBy('updated_at', Q.desc));
+
     const query = collection.query(...conditions);
 
     const subscription = query.observe().subscribe(async (data) => {
       const enhanced = await Promise.all(
         data.map(async (p) => {
           let lastVisitDate = undefined;
+          let latestVisitUpdate = 0;
           let assignedDoctorName = undefined;
 
           try {
@@ -69,6 +90,16 @@ export function usePatients(searchQuery1: string = "", searchQuery2: string = ""
               const lastVisit = visits[0];
               lastVisitDate = new Date(lastVisit.createdAt).toISOString();
             }
+
+            // Fetch latest updated visit for sorting
+            const updatedVisits = await p.visits.extend(
+              Q.sortBy('updated_at', Q.desc),
+              Q.take(1)
+            ).fetch() as VisitModel[];
+
+            if (updatedVisits.length > 0) {
+              latestVisitUpdate = updatedVisits[0].updatedAt;
+            }
           } catch (err) {
             console.error("Error fetching patient relation info", err);
           }
@@ -76,16 +107,24 @@ export function usePatients(searchQuery1: string = "", searchQuery2: string = ""
           return {
             patient: p,
             lastVisitDate,
+            latestVisitUpdate,
             assignedDoctorName
           };
         })
       );
+
+      // Sort in JS to ensure patients with recently updated visits float to the top
+      enhanced.sort((a, b) => {
+        const aTime = Math.max(a.patient.updatedAt, a.latestVisitUpdate);
+        const bTime = Math.max(b.patient.updatedAt, b.latestVisitUpdate);
+        return bTime - aTime; // descending
+      });
       
       setPatients(enhanced);
     });
 
     return () => subscription.unsubscribe();
-  }, [searchQuery1, searchQuery2, doctorIdFilter]);
+  }, [searchQuery1, searchQuery2, doctorIdFilter, dateFilter.day, dateFilter.month, dateFilter.year]);
 
   return patients;
 }

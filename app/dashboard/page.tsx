@@ -11,6 +11,7 @@ import {
   PatientSearchBar,
   PatientTable,
   Pagination,
+  DateFilter,
 } from "@/components/ui/dashboard";
 import { usePatients } from "@/hooks/usePatients";
 import { useDoctors } from "@/hooks/useDoctors";
@@ -26,9 +27,10 @@ export default function DashboardPage() {
   const [search1, setSearch1] = useState("");
   const [search2, setSearch2] = useState("");
   const [doctorIdFilter, setDoctorIdFilter] = useState("");
-  const PAGE_SIZE = 15;
+  const [dateFilter, setDateFilter] = useState({ day: "", month: "", year: "" });
+  const PAGE_SIZE = 100;
 
-  const watermelonPatients = usePatients(search1, search2, doctorIdFilter);
+  const watermelonPatients = usePatients(search1, search2, doctorIdFilter, dateFilter);
 
   // Map to the UI expected type
   const filtered: Patient[] = watermelonPatients.map((ep) => ({
@@ -70,26 +72,30 @@ export default function DashboardPage() {
         }}
       >
         {/* Search & Filter */}
-        <div style={{ marginBottom: "1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+        <div style={{ marginBottom: "1.5rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
           <PatientSearchBar
             value={search1}
             onChange={handleSearch1}
-            placeholder="Search patients by name, phone, address or first visit date..."
+            placeholder="Search by name, phone or address..."
           />
           <PatientSearchBar
             value={search2}
             onChange={handleSearch2}
             placeholder="Filter results further..."
           />
+          <DateFilter 
+            value={dateFilter}
+            onChange={setDateFilter}
+          />
           <select
             className="form-input"
             value={doctorIdFilter}
             onChange={(e) => setDoctorIdFilter(e.target.value)}
-            style={{ cursor: "pointer", height: "100%" }}
+            style={{ cursor: "pointer", height: "100%", minHeight: "2.5rem" }}
           >
             <option value="">All Doctors</option>
             {doctors.map(d => (
-              <option key={d.id} value={d.id}>Dr. {d.name}</option>
+              <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
         </div>
@@ -118,6 +124,8 @@ export default function DashboardPage() {
             pageSize={PAGE_SIZE}
             onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
             onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            onFirst={() => setCurrentPage(1)}
+            onLast={() => setCurrentPage(totalPages)}
           />
         )}
       </main>

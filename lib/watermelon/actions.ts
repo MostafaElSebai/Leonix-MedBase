@@ -102,8 +102,9 @@ export async function deletePatient(patientId: string): Promise<void> {
 export async function createVisit(patientId: string, doctorId: string, data: VisitFormData): Promise<Visit> {
   const result = await database.write(async () => {
     const visitsCollection = database.collections.get<Visit>('visits');
+    const patientsCollection = database.collections.get<Patient>('patients');
     
-    return await visitsCollection.create((visit) => {
+    const newVisit = await visitsCollection.create((visit) => {
       visit._raw.id = generateId();
       visit.dbSyncStatus = 'created';
       
@@ -120,6 +121,8 @@ export async function createVisit(patientId: string, doctorId: string, data: Vis
       visit.nextVisitType = data.nextVisitType;
       visit.notes = data.notes;
     });
+
+    return newVisit;
   });
 
   // Trigger background sync
@@ -130,9 +133,11 @@ export async function createVisit(patientId: string, doctorId: string, data: Vis
 export async function updateVisit(visitId: string, data: Partial<VisitFormData>): Promise<Visit> {
   const result = await database.write(async () => {
     const visitsCollection = database.collections.get<Visit>('visits');
+    const patientsCollection = database.collections.get<Patient>('patients');
+    
     const visit = await visitsCollection.find(visitId);
     
-    return await visit.update((v) => {
+    const updatedVisit = await visit.update((v) => {
       if (v.dbSyncStatus !== 'created') {
         v.dbSyncStatus = 'updated';
       }
@@ -147,6 +152,8 @@ export async function updateVisit(visitId: string, data: Partial<VisitFormData>)
       if (data.nextVisitType !== undefined) v.nextVisitType = data.nextVisitType;
       if (data.notes !== undefined) v.notes = data.notes;
     });
+
+    return updatedVisit;
   });
 
   // Trigger background sync

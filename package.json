@@ -6,7 +6,11 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:seed": "npx tsx tests/utils/seed-test-data.ts",
+    "test:teardown": "npx tsx tests/utils/teardown-test-data.ts",
+    "test:stress": "npx playwright test tests/e2e/doctor-shift.spec.ts --project=chromium",
+    "test:search": "npx playwright test tests/e2e/patient-search.spec.ts --project=chromium"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -18,13 +22,18 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@faker-js/faker": "^10.5.0",
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

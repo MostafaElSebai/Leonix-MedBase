@@ -5,6 +5,8 @@ interface PaginationProps {
   pageSize: number;
   onPrev: () => void;
   onNext: () => void;
+  onFirst: () => void;
+  onLast: () => void;
 }
 
 export function Pagination({
@@ -14,6 +16,8 @@ export function Pagination({
   pageSize,
   onPrev,
   onNext,
+  onFirst,
+  onLast,
 }: PaginationProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalCount);
@@ -48,7 +52,16 @@ export function Pagination({
       </p>
 
       {/* Controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={onFirst}
+          disabled={currentPage === 1}
+          aria-label="Go to first page"
+        >
+          First
+        </button>
+
         <button
           className="btn btn-secondary btn-sm"
           onClick={onPrev}
@@ -69,7 +82,7 @@ export function Pagination({
           >
             <path d="M15 18l-6-6 6-6" />
           </svg>
-          <span>Previous</span>
+          <span>Prev</span>
         </button>
 
         <span
@@ -77,6 +90,7 @@ export function Pagination({
             fontSize: "0.875rem",
             color: "var(--color-text-muted)",
             whiteSpace: "nowrap",
+            margin: "0 0.25rem",
           }}
         >
           Page{" "}
@@ -106,6 +120,15 @@ export function Pagination({
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
+        </button>
+
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={onLast}
+          disabled={currentPage === totalPages}
+          aria-label="Go to last page"
+        >
+          Last
         </button>
       </div>
     </div>

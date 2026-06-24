@@ -17,9 +17,16 @@ const checkInternet = async () => {
     return false;
   }
 };
+let isSyncing = false;
 
 export async function sync() {
+  if (isSyncing) {
+    console.log("Sync already in progress. Skipping concurrent request.");
+    return;
+  }
+  
   try {
+    isSyncing = true;
     // Prevent sync from starting if we are in "Lie-Fi" or offline
     const hasInternet = await checkInternet();
     if (!hasInternet) {
@@ -68,5 +75,7 @@ export async function sync() {
     console.log('Sync completed successfully!');
   } catch (error) {
     console.error('Sync failed:', error);
+  } finally {
+    isSyncing = false;
   }
 }

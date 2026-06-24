@@ -21,7 +21,6 @@ const adapter = new LokiJSAdapter({
   },
 });
 
-// 2. Instantiate the database
 export const database = new Database({
   adapter,
   modelClasses: [
@@ -30,3 +29,8 @@ export const database = new Database({
     Visit,
   ],
 });
+
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.watermelonDB = database;
+}
