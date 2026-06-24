@@ -274,13 +274,13 @@ export function VisitForm({ onSubmit, initialData }: VisitFormProps) {
             <label htmlFor="visit-nv-date" style={LABEL}>
               Next Visit Date
             </label>
-            <input
-              id="visit-nv-date"
-              type="date"
-              className="form-input"
-              value={form.nextVisitDate}
-              onChange={set("nextVisitDate")}
-            />
+            <div className="form-input" style={{ padding: 0 }}>
+              <DateInput
+                id="visit-nv-date"
+                value={form.nextVisitDate}
+                onChange={(val) => setForm((prev) => ({ ...prev, nextVisitDate: val }))}
+              />
+            </div>
           </div>
 
           {/* NV Type */}

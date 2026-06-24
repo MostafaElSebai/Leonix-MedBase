@@ -118,6 +118,14 @@ export async function GET(request: Request) {
   try {
     const supabase = await getServerClient();
     
+    // CRITICAL: We must explicitly call getUser() to parse the cookies 
+    // and attach the Authorization header. Otherwise, Supabase treats 
+    // this as an anonymous request and RLS blocks it!
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const changes = {
       doctors: await pullTable(supabase, 'doctors', lastPulledAt),
       patients: await pullTable(supabase, 'patients', lastPulledAt),
@@ -170,6 +178,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { changes } = body;
     const supabase = await getServerClient();
+
+    // CRITICAL: Force session validation for RLS policies
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     await pushTable(supabase, 'patients', changes.patients || { created: [], updated: [], deleted: [] });
     await pushTable(supabase, 'visits', changes.visits || { created: [], updated: [], deleted: [] });

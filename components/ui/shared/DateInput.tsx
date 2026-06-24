@@ -54,11 +54,11 @@ export function DateInput({ id, value, onChange, required, className }: DateInpu
   };
 
   const update = (y: string, m: string, d: string) => {
-    if (!y && !m && !d) {
+    if (!y || !m || !d || y.length < 4) {
       onChange("");
     } else {
-      const paddedMonth = m ? m.padStart(2, '0') : '01';
-      const paddedDay = d ? d.padStart(2, '0') : '01';
+      const paddedMonth = m.padStart(2, '0');
+      const paddedDay = d.padStart(2, '0');
       onChange(`${y}-${paddedMonth}-${paddedDay}`);
     }
   };
@@ -96,6 +96,12 @@ export function DateInput({ id, value, onChange, required, className }: DateInpu
         e.preventDefault();
         if (field === "month") dayRef.current?.focus();
         else if (field === "year") monthRef.current?.focus();
+      }
+    } else if (e.key === "Backspace") {
+      if (target.value.length === 0) {
+        e.preventDefault();
+        if (field === "year") monthRef.current?.focus();
+        else if (field === "month") dayRef.current?.focus();
       }
     }
   };

@@ -115,8 +115,8 @@ export function usePatients(
 
       // Sort in JS to ensure patients with recently updated visits float to the top
       enhanced.sort((a, b) => {
-        const aTime = Math.max(a.patient.updatedAt, a.latestVisitUpdate);
-        const bTime = Math.max(b.patient.updatedAt, b.latestVisitUpdate);
+        const aTime = Math.max(a.patient.updatedAt || 0, a.latestVisitUpdate || 0);
+        const bTime = Math.max(b.patient.updatedAt || 0, b.latestVisitUpdate || 0);
         return bTime - aTime; // descending
       });
       

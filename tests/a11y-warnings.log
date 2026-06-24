@@ -92,3 +92,29 @@
 
 ⚠️  [A11Y Warnings Logged] Patient profile — iteration 1
   [UI-Warning] nested-interactive: Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies
+
+⚠️  [A11Y Warnings Logged] Dashboard after login
+  [UI-Warning] select-name: Ensure select element has an accessible name
+
+⚠️  [A11Y Warnings Logged] Patient profile — iteration 1
+  [UI-Warning] document-title: Ensure each HTML document contains a non-empty <title> element
+  [UI-Warning] nested-interactive: Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies
+
+⚠️  [A11Y Warnings Logged] Dashboard after login
+  [UI-Warning] color-contrast: Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+  [UI-Warning] nested-interactive: Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies
+  [UI-Warning] select-name: Ensure select element has an accessible name
+
+⚠️  [A11Y Warnings Logged] Patient profile — iteration 1
+  [UI-Warning] nested-interactive: Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies
+
+⚠️  [A11Y Warnings Logged] Dashboard — end of shift
+  [UI-Warning] landmark-one-main: Ensure the document has a main landmark
+  [UI-Warning] page-has-heading-one: Ensure that the page, or at least one of its frames contains a level-one heading
+  [UI-Warning] region: Ensure all page content is contained by landmarks
+
+⚠️  [A11Y Warnings Logged] Dashboard after login
+  [UI-Warning] select-name: Ensure select element has an accessible name
+
+⚠️  [A11Y Warnings Logged] Patient profile — iteration 1
+  [UI-Warning] nested-interactive: Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies

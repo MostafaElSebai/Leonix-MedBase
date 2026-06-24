@@ -44,8 +44,10 @@ export function ConfirmDialog({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (e.key === "Escape") {
+        e.preventDefault();
         onCancel();
       } else if (e.key === "Enter") {
+        e.preventDefault();
         if (!requirePin || pinInput === requirePin) {
           onConfirm();
         }
@@ -159,12 +161,14 @@ export function ConfirmDialog({
           }}
         >
           <button
+            type="button"
             className="btn btn-ghost btn-sm"
             onClick={onCancel}
           >
             {cancelLabel}
           </button>
           <button
+            type="button"
             className="btn btn-primary btn-sm"
             onClick={onConfirm}
             disabled={isConfirmDisabled}

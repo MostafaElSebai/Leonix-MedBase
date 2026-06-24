@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 import { Patient } from "@/app/types/index";
@@ -57,6 +57,20 @@ export default function DashboardPage() {
     setSearch2(value);
     setCurrentPage(1);
   };
+
+  // Ensure user is authenticated before displaying dashboard
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p>Authenticating...</p>
+      </div>
+    );
+  }
+
+  if (!doctor) {
+    router.push("/");
+    return null;
+  }
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-app)" }}>
