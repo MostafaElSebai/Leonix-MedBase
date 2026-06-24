@@ -59,6 +59,10 @@ export function useDoctorAuth() {
       setPin(""); // clear so the doctor can immediately re-type
     } else {
       setAuthStatus("success");
+      // Trigger an immediate background sync as soon as they log in
+      import("@/lib/watermelon/sync").then(({ sync }) => {
+        sync().catch(err => console.error("Sync after login failed", err));
+      });
       setTimeout(goToDashboard, 300);
     }
   }

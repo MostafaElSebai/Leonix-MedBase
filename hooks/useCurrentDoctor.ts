@@ -64,10 +64,10 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
           .from("doctors")
           .select("id, name, email, pin")
           .eq("email", email)
-          .single();
+          .limit(1);
 
-        if (!dbError && data) {
-          setDoctor(data as Pick<Doctor, "id" | "name" | "email" | "pin">);
+        if (!dbError && data && data.length > 0) {
+          setDoctor(data[0] as Pick<Doctor, "id" | "name" | "email" | "pin">);
           setLoading(false);
           return;
         }

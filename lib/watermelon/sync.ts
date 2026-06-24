@@ -34,6 +34,14 @@ export async function sync() {
       return;
     }
 
+    // Check if the user is logged in
+    const { supabase } = await import('@/lib/supabase/db');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.warn("No active session. Skipping sync to prevent 401 errors.");
+      return;
+    }
+
     await synchronize({
       database,
 
