@@ -25,6 +25,32 @@ const withPWA = withPWAInit({
           cacheName: 'supabase-bypass',
         },
       },
+      {
+        // Match the RSC requests for our static profile pages
+        urlPattern: ({ request, url }) => {
+          const isRSC = request.headers.get('RSC') === '1';
+          const isProfile = /^\/(patients\/profile|visits\/view)/i.test(url.pathname);
+          return isRSC && isProfile;
+        },
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'offline-profiles-rsc',
+          matchOptions: {
+            ignoreSearch: true,
+          },
+        },
+      },
+      {
+        // Match the HTML requests for our static profile pages
+        urlPattern: /^\/(patients\/profile|visits\/view)/i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'offline-profiles-html',
+          matchOptions: {
+            ignoreSearch: true,
+          },
+        },
+      },
       ...defaultCache,
     ],
   },
