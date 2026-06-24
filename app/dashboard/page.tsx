@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentDoctor } from "@/hooks/useCurrentDoctor";
 import { Patient } from "@/app/types/index";
@@ -57,6 +57,18 @@ export default function DashboardPage() {
     setSearch2(value);
     setCurrentPage(1);
   };
+
+  // Warm up the Next.js router and Service Worker runtime cache for all static offline shells
+  useEffect(() => {
+    if (doctor && !loading) {
+      router.prefetch("/patients/profile");
+      router.prefetch("/patients/profile/edit");
+      router.prefetch("/patients/new");
+      router.prefetch("/visits/view");
+      router.prefetch("/visits/view/edit");
+      router.prefetch("/visits/new");
+    }
+  }, [doctor, loading, router]);
 
   // Ensure user is authenticated before displaying dashboard
   if (loading) {
