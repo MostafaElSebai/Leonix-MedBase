@@ -1,8 +1,11 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function OfflineFallbackPage() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center px-4">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-md w-full">
@@ -24,12 +27,20 @@ export default function OfflineFallbackPage() {
         <p className="text-gray-500 mb-6">
           It looks like you've lost your internet connection. Please check your network and try again.
         </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-        >
-          Try Again
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => router.back()}
+            className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-medium py-2.5 px-4 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     </div>
   );

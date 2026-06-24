@@ -152,7 +152,7 @@ export function PatientHeader({ onAddVisit, onDelete, notes }: PatientHeaderProp
           {/* Current Patient Actions */}
           <button
             className="btn btn-ghost btn-sm"
-            onClick={() => router.push(`/patients/${patientId}/edit`)}
+            onClick={() => router.push(`/patients/profile/edit?id=${patientId}`)}
             aria-label="Edit patient data"
             style={{ gap: "0.375rem" }}
           >

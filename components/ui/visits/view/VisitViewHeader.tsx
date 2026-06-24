@@ -34,7 +34,7 @@ export function VisitViewHeader({
       <AppHeaderBar 
         title={title}
         backLabel="Patient Profile"
-        backHref={`/patients/${patientId}`}
+        backHref={`/patients/profile?id=${patientId}`}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           
@@ -72,7 +72,7 @@ export function VisitViewHeader({
 
           <button
             className="btn btn-ghost btn-sm"
-            onClick={() => router.push(`/visits/${visitId}/edit`)}
+            onClick={() => router.push(`/visits/view/edit?id=${visitId}`)}
             aria-label="Edit visit data"
             style={{ gap: "0.375rem" }}
           >

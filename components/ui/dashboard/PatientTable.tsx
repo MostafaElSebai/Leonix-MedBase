@@ -134,7 +134,7 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
               {sortedPatients.map((patient, idx) => (
                 <tr
                   key={patient.id}
-                  onClick={() => router.push(`/patients/${patient.id}`)}
+                  onClick={() => router.push(`/patients/profile?id=${patient.id}`)}
                   style={{
                     backgroundColor: idx % 2 === 0 ? "var(--color-bg-card)" : "var(--color-bg-app)",
                     transition: "background-color 150ms ease-in-out",
@@ -149,7 +149,7 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
                   }}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && router.push(`/patients/${patient.id}`)}
+                  onKeyDown={(e) => e.key === "Enter" && router.push(`/patients/profile?id=${patient.id}`)}
                   aria-label={`View profile for ${patient.name}`}
                 >
                   {/* Name */}
@@ -213,7 +213,7 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
                         className="btn btn-secondary btn-sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/patients/${patient.id}/edit`);
+                          router.push(`/patients/profile/edit?id=${patient.id}`);
                         }}
                         style={{ padding: "0.25rem 0.5rem", minHeight: "0", height: "auto", fontSize: "0.75rem", gap: "0.25rem" }}
                         aria-label="Edit patient"

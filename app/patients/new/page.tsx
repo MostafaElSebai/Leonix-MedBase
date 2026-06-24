@@ -13,7 +13,7 @@ export default function NewPatientPage() {
   const handleSave = async (data: NewPatientFormData) => {
     try {
       const newPatient = await createPatient(data);
-      router.replace(`/patients/${newPatient.id}`);
+      router.replace(`/patients/profile?id=${newPatient.id}`);
     } catch (error) {
       console.error("Failed to create patient", error);
       alert("Failed to save patient. Please try again.");

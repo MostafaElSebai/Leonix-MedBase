@@ -1,7 +1,8 @@
 // Edit existing patient — app/patients/[patientId]/edit/page.tsx
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePatientById } from "@/hooks/usePatientById";
 import { NewPatientHeader, NewPatientForm, NewPatientFormData } from "@/components/ui/patients";
 import { updatePatient } from "@/lib/watermelon/actions";
@@ -33,9 +34,9 @@ function FormSkeleton() {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default function EditPatientPage() {
-  const params = useParams();
-  const patientId = params?.patientId as string;
+function EditPatientContent() {
+  const searchParams = useSearchParams();
+  const patientId = searchParams.get('id') as string;
   const router = useRouter();
 
   const { formData, loading, error } = usePatientById(patientId);
@@ -43,7 +44,7 @@ export default function EditPatientPage() {
   const handleSave = async (data: NewPatientFormData) => {
     try {
       await updatePatient(patientId, data);
-      router.replace(`/patients/${patientId}`);
+      router.replace(`/patients/profile?id=${patientId}`);
     } catch (err) {
       console.error("Failed to update patient", err);
       alert("Failed to update patient. Please try again.");
@@ -55,7 +56,7 @@ export default function EditPatientPage() {
       <NewPatientHeader 
         title="Edit Patient" 
         saveLabel="Save Changes" 
-        backHref={`/patients/${patientId}`}
+        backHref={`/patients/profile?id=${patientId}`}
         formId="patient-form" 
       />
 
@@ -80,5 +81,13 @@ export default function EditPatientPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function EditPatientPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", padding: "2rem", display: "flex", justifyContent: "center" }}>Loading...</div>}>
+      <EditPatientContent />
+    </Suspense>
   );
 }

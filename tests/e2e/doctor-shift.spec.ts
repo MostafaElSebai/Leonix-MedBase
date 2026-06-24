@@ -233,8 +233,8 @@ async function createNewPatient(page: Page): Promise<string> {
   await page.click('button[aria-label="Save new patient record"]');
 
   // Hard assertion: must redirect to patient profile — signals DB write succeeded
-  await page.waitForURL(/\/patients\/[a-z0-9-]{5,}$/i, { timeout: 15_000 });
-  const newPatientId = page.url().split('/patients/')[1];
+  await page.waitForURL(/\/patients\/profile\?id=[a-z0-9-]{5,}$/i, { timeout: 15_000 });
+  const newPatientId = page.url().split('?id=')[1];
 
   expect(newPatientId).toBeTruthy();
   expect(newPatientId.length).toBeGreaterThan(4);
@@ -252,15 +252,15 @@ async function openExistingPatient(page: Page, patientId: string): Promise<void>
   if (await searchInput.isVisible().catch(() => false)) {
     await searchInput.fill(patientId);
     // Wait for the debounced search to show the patient link
-    const patientLink = page.locator(`a[href="/patients/${patientId}"]`);
+    const patientLink = page.locator(`a[href="/patients/profile?id=${patientId}"]`);
     await patientLink.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
     if (await patientLink.isVisible().catch(() => false)) {
       await patientLink.click();
     } else {
-      await page.goto(`${BASE_URL}/patients/${patientId}`).catch(() => {});
+      await page.goto(`${BASE_URL}/patients/profile?id=${patientId}`).catch(() => {});
     }
   } else {
-    await page.goto(`${BASE_URL}/patients/${patientId}`).catch(() => {});
+    await page.goto(`${BASE_URL}/patients/profile?id=${patientId}`).catch(() => {});
   }
 
   // Wait for either the profile to load (Add Visit button) or the not found message
@@ -277,7 +277,7 @@ async function openExistingPatient(page: Page, patientId: string): Promise<void>
 
 /**
  * Log a new visit from the current patient profile page.
- * Assumes we are already on `/patients/{id}`.
+ * Assumes we are already on `/patients/profile?id={id}`.
  */
 async function logVisitForCurrentPatient(page: Page): Promise<void> {
   // Click "Add Visit" button — from PatientHeader
@@ -303,7 +303,7 @@ async function logVisitForCurrentPatient(page: Page): Promise<void> {
   await saveBtn.click();
 
   // Must redirect back to patient profile
-  await page.waitForURL(/\/patients\/[a-z0-9]+$/, { timeout: 15_000 });
+  await page.waitForURL(/\/patients\/profile\?id=[a-z0-9-]+$/i, { timeout: 15_000 });
 }
 
 async function softA11yScan(page: Page, context: string): Promise<void> {
@@ -481,7 +481,7 @@ test.describe('Doctor Shift Simulation — Chaos Stress Test', () => {
     console.log('\n🔍 Verifying new patients appear in dashboard search index...');
     for (const patientId of createdPatientIds.slice(0, 3)) {
       // Navigate to each created patient profile — hard assertion
-      await page.goto(`${BASE_URL}/patients/${patientId}`).catch(() => {});
+      await page.goto(`${BASE_URL}/patients/profile?id=${patientId}`).catch(() => {});
       
       // Wait for either the profile to load or the not found message
       await Promise.race([

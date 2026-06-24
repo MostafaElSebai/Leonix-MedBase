@@ -1,7 +1,8 @@
 // Profile: Patient details & Visit list
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Patient, Visit } from "@/app/types/index";
 import { PatientHeader, PatientInfoCard } from "@/components/ui/patients";
 import { VisitTable } from "@/components/ui/visits";
@@ -12,9 +13,9 @@ import { calculateAge } from "@/lib/utils";
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default function PatientProfilePage() {
-  const params = useParams();
-  const patientId = params?.patientId as string;
+function PatientProfileContent() {
+  const searchParams = useSearchParams();
+  const patientId = searchParams.get('id') as string;
   const router = useRouter();
 
   const { formData: patientData, doctorName, loading: patientLoading } = usePatientById(patientId);
@@ -153,5 +154,13 @@ export default function PatientProfilePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function PatientProfilePage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", padding: "2rem", display: "flex", justifyContent: "center" }}>Loading...</div>}>
+      <PatientProfileContent />
+    </Suspense>
   );
 }

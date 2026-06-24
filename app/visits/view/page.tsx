@@ -1,7 +1,8 @@
 // View visit details — /visits/[visitId]
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useVisitById } from "@/hooks/useVisitById";
 import { VisitViewHeader, VisitViewCard } from "@/components/ui/visits/view";
 import { deleteVisit } from "@/lib/watermelon/actions";
@@ -33,9 +34,9 @@ function ViewSkeleton() {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default function ViewVisitPage() {
-  const params = useParams();
-  const visitId = params?.visitId as string;
+function ViewVisitContent() {
+  const searchParams = useSearchParams();
+  const visitId = searchParams.get('id') as string;
   const router = useRouter();
 
   const { formData, patientId, loading, error } = useVisitById(visitId);
@@ -44,7 +45,7 @@ export default function ViewVisitPage() {
     try {
       await deleteVisit(visitId);
       if (patientId) {
-        router.push(`/patients/${patientId}`);
+        router.push(`/patients/profile?id=${patientId}`);
       } else {
         router.push("/dashboard");
       }
@@ -84,5 +85,13 @@ export default function ViewVisitPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ViewVisitPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", padding: "2rem", display: "flex", justifyContent: "center" }}>Loading...</div>}>
+      <ViewVisitContent />
+    </Suspense>
   );
 }

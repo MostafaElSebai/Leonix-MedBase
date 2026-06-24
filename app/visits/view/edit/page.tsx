@@ -1,7 +1,8 @@
 // Edit existing visit — /visits/[visitId]/edit
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useVisitById } from "@/hooks/useVisitById";
 import { VisitHeader, VisitForm, VisitFormData } from "@/components/ui/visits";
 import { updateVisit, deleteVisit } from "@/lib/watermelon/actions";
@@ -33,9 +34,9 @@ function FormSkeleton() {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default function EditVisitPage() {
-  const params = useParams();
-  const visitId = params?.visitId as string;
+function EditVisitContent() {
+  const searchParams = useSearchParams();
+  const visitId = searchParams.get('id') as string;
   const router = useRouter();
 
   const { formData, patientId, loading, error } = useVisitById(visitId);
@@ -44,7 +45,7 @@ export default function EditVisitPage() {
     try {
       await updateVisit(visitId, data);
       if (patientId) {
-        router.replace(`/patients/${patientId}`);
+        router.replace(`/patients/profile?id=${patientId}`);
       } else {
         router.replace("/dashboard");
       }
@@ -58,7 +59,7 @@ export default function EditVisitPage() {
     try {
       await deleteVisit(visitId);
       if (patientId) {
-        router.replace(`/patients/${patientId}`);
+        router.replace(`/patients/profile?id=${patientId}`);
       } else {
         router.replace("/dashboard");
       }
@@ -73,7 +74,7 @@ export default function EditVisitPage() {
       <VisitHeader 
         title="Edit Visit" 
         saveLabel="Save Changes" 
-        backHref={patientId ? `/patients/${patientId}` : "/dashboard"}
+        backHref={patientId ? `/patients/profile?id=${patientId}` : "/dashboard"}
         onDelete={handleDelete}
         formId="visit-form"
       />
@@ -98,5 +99,13 @@ export default function EditVisitPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function EditVisitPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", padding: "2rem", display: "flex", justifyContent: "center" }}>Loading...</div>}>
+      <EditVisitContent />
+    </Suspense>
   );
 }

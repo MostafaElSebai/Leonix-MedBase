@@ -45,7 +45,7 @@ function NewVisitContent() {
     if (!patientId || !doctor?.id) return;
     try {
       await createVisit(patientId, String(doctor.id), data);
-      router.replace(`/patients/${patientId}`);
+      router.replace(`/patients/profile?id=${patientId}`);
     } catch (err) {
       console.error("Failed to create visit", err);
       alert("Failed to create visit. Please try again.");
@@ -57,7 +57,7 @@ function NewVisitContent() {
       <VisitHeader 
         title="New Visit" 
         saveLabel="Save Visit" 
-        backHref={patientId ? `/patients/${patientId}` : "/dashboard"}
+        backHref={patientId ? `/patients/profile?id=${patientId}` : "/dashboard"}
         formId="visit-form" 
       />
       <main>
