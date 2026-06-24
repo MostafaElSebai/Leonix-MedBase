@@ -8,7 +8,7 @@ const withPWA = withPWAInit({
   aggressiveFrontEndNavCaching: true,
   workboxOptions: {
     // Tell the precache to ignore the "id" query parameter so that static profiles load perfectly offline
-    ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^id$/],
+    ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^id$/, /^patientId$/],
     // This is CRITICAL for production. We absolutely DO NOT want the Service Worker 
     // to cache any Supabase API calls or WatermelonDB sync calls, otherwise the app 
     // will think it successfully synced data when it really just talked to its own cache!
