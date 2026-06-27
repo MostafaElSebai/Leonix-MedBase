@@ -59,12 +59,18 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
       }
 
       // Step 3: Fallback to network (Supabase) if not found locally
+      let networkData = null;
+      let networkError = null;
+
       if (navigator.onLine) {
         const { data, error: dbError } = await supabase
           .from("doctors")
           .select("id, name, email, pin")
           .eq("email", email)
           .limit(1);
+          
+        networkData = data;
+        networkError = dbError;
 
         if (!dbError && data && data.length > 0) {
           setDoctor(data[0] as Pick<Doctor, "id" | "name" | "email" | "pin">);
@@ -73,7 +79,7 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
         }
       }
 
-      console.log("useCurrentDoctor: failed to find doctor", { email, data, dbError });
+      console.log("useCurrentDoctor: failed to find doctor", { email, data: networkData, dbError: networkError });
       setError("Doctor not found locally or network is offline.");
       setLoading(false);
     };
