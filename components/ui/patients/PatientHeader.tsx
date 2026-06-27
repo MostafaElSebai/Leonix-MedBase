@@ -62,15 +62,24 @@ export function PatientHeader({ onAddVisit, onDelete, notes }: PatientHeaderProp
                 justifyContent: "center",
                 position: "relative"
               }}>
-                <div style={{ minWidth: 0, textAlign: "center", maxWidth: "800px", padding: "0 2rem" }}>
+                <div style={{ 
+                  minWidth: 0, 
+                  textAlign: notesExpanded ? "left" : "center", 
+                  maxWidth: "800px", 
+                  padding: "0 2rem",
+                  display: notesExpanded ? "block" : "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}>
                   <span style={{
                     fontWeight: 700,
                     fontSize: "0.75rem",
                     color: "#D97706",
                     textTransform: "uppercase",
                     marginRight: notesExpanded ? "0" : "0.5rem",
-                    display: notesExpanded ? "block" : "inline",
-                    marginBottom: notesExpanded ? "0.25rem" : "0"
+                    display: notesExpanded ? "block" : "inline-block",
+                    marginBottom: notesExpanded ? "0.25rem" : "0",
+                    flexShrink: 0
                   }}>
                     ⚠️ Important Notes:
                   </span>
@@ -78,10 +87,11 @@ export function PatientHeader({ onAddVisit, onDelete, notes }: PatientHeaderProp
                     color: "#92400E",
                     fontSize: "0.9375rem",
                     fontWeight: 600,
-                    display: notesExpanded ? "block" : "inline",
+                    display: "block",
                     whiteSpace: notesExpanded ? "pre-wrap" : "nowrap",
-                    overflow: notesExpanded ? "visible" : "hidden",
+                    overflow: "hidden",
                     textOverflow: notesExpanded ? "clip" : "ellipsis",
+                    wordBreak: "break-word"
                   }}>
                     {notes}
                   </span>

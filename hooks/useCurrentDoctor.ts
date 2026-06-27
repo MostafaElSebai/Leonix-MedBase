@@ -73,7 +73,7 @@ export function useCurrentDoctor(): UseCurrentDoctorResult {
         }
       }
 
-      console.log("useCurrentDoctor: failed to find doctor");
+      console.log("useCurrentDoctor: failed to find doctor", { email, data, dbError });
       setError("Doctor not found locally or network is offline.");
       setLoading(false);
     };
