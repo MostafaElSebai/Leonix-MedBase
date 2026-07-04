@@ -81,6 +81,9 @@ export async function sync() {
     });
 
     console.log('Sync completed successfully!');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('watermelon-sync-complete'));
+    }
   } catch (error) {
     console.error('Sync failed:', error);
   } finally {

@@ -19,6 +19,13 @@ export function usePatients(
   dateFilter: { day: string; month: string; year: string } = { day: "", month: "", year: "" }
 ) {
   const [patients, setPatients] = useState<EnhancedPatient[]>([]);
+  const [syncTrigger, setSyncTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleSync = () => setSyncTrigger(prev => prev + 1);
+    window.addEventListener('watermelon-sync-complete', handleSync);
+    return () => window.removeEventListener('watermelon-sync-complete', handleSync);
+  }, []);
 
   useEffect(() => {
     const collection = database.collections.get<PatientModel>("patients");
@@ -124,7 +131,7 @@ export function usePatients(
     });
 
     return () => subscription.unsubscribe();
-  }, [searchQuery1, searchQuery2, doctorIdFilter, dateFilter.day, dateFilter.month, dateFilter.year]);
+  }, [searchQuery1, searchQuery2, doctorIdFilter, dateFilter.day, dateFilter.month, dateFilter.year, syncTrigger]);
 
   return patients;
 }

@@ -139,6 +139,7 @@ export function ConfirmDialog({
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
                 autoFocus
+                autoComplete="new-password"
                 className="form-input"
                 placeholder="••••"
                 style={{ 

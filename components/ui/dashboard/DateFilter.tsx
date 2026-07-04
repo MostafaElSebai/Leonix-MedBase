@@ -114,6 +114,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
         onChange={handleDay}
         onBlur={handleBlurDay}
         onKeyDown={(e) => handleKeyDown(e, "day")}
+        autoComplete="off"
         style={{ flex: 1, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%" }}
       />
       <span style={{ color: "var(--color-text-muted)", fontWeight: "bold" }}>/</span>
@@ -125,6 +126,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
         onChange={handleMonth}
         onBlur={handleBlurMonth}
         onKeyDown={(e) => handleKeyDown(e, "month")}
+        autoComplete="off"
         style={{ flex: 1, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%" }}
       />
       <span style={{ color: "var(--color-text-muted)", fontWeight: "bold" }}>/</span>
@@ -135,6 +137,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
         value={value.year}
         onChange={handleYear}
         onKeyDown={(e) => handleKeyDown(e, "year")}
+        autoComplete="off"
         style={{ flex: 1.5, textAlign: "center", background: "transparent", border: "none", outline: "none", width: "100%" }}
       />
     </div>
