@@ -80,7 +80,8 @@ export async function sync() {
       //   migrationsEnabledAtVersion: 1, 
     });
 
-    console.log('Sync completed successfully!!!!');
+    console.log('Sync completed successfully!');
+    console.log(` Sync completed successfully at ${new Date().toISOString()}`);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('watermelon-sync-complete'));
     }
