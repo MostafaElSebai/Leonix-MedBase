@@ -39,7 +39,7 @@ export function PatientSearchBar({ value, onChange, placeholder }: PatientSearch
       <input
         type="search"
         className="form-input"
-        placeholder={placeholder || "Search by name, phone, or address…"}
+        placeholder={placeholder || "Search by name, phone, or addressss…"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Search patients"
