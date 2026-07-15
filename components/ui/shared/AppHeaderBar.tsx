@@ -41,6 +41,7 @@ export function AppHeaderBar({
 
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -86,6 +87,7 @@ export function AppHeaderBar({
 
   const handleInstallUpdate = () => {
     if (waitingWorker) {
+      setIsUpdating(true);
       waitingWorker.postMessage({ type: "SKIP_WAITING" });
     }
   };
@@ -102,6 +104,11 @@ export function AppHeaderBar({
         borderBottom: "1px solid var(--color-border)",
       }}
     >
+      {/* Global wait cursor when updating */}
+      {isUpdating && (
+        <style dangerouslySetInnerHTML={{ __html: `body { cursor: wait !important; pointer-events: none; }` }} />
+      )}
+
       {/* ── Update Banner ──────────────────────────────────────────────── */}
       {updateAvailable && (
         <div
@@ -126,6 +133,7 @@ export function AppHeaderBar({
           </div>
           <button
             onClick={handleInstallUpdate}
+            disabled={isUpdating}
             style={{
               backgroundColor: "white",
               color: "var(--color-brand)",
@@ -134,16 +142,18 @@ export function AppHeaderBar({
               borderRadius: "9999px",
               fontWeight: 700,
               fontSize: "0.75rem",
-              cursor: "pointer",
+              cursor: isUpdating ? "wait" : "pointer",
+              opacity: isUpdating ? 0.7 : 1,
               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              transition: "transform 150ms ease, opacity 150ms ease"
+              transition: "transform 150ms ease, opacity 150ms ease",
+              pointerEvents: "auto" // Ensure it can still be clicked if pointer-events none is on body
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
-            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+            onMouseEnter={(e) => { if (!isUpdating) e.currentTarget.style.transform = "scale(1.05)" }}
+            onMouseLeave={(e) => { if (!isUpdating) e.currentTarget.style.transform = "scale(1)" }}
+            onMouseDown={(e) => { if (!isUpdating) e.currentTarget.style.transform = "scale(0.95)" }}
+            onMouseUp={(e) => { if (!isUpdating) e.currentTarget.style.transform = "scale(1.05)" }}
           >
-            Update Now
+            {isUpdating ? "Updating..." : "Update Now"}
           </button>
         </div>
       )}
