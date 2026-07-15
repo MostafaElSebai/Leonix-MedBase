@@ -110,21 +110,21 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
                 <th scope="col" style={COL_HEADER}>Phone</th>
                 <th scope="col" style={COL_HEADER}>Age</th>
                 <th scope="col" style={COL_HEADER}>Address</th>
-                <SortableHeader 
-                  field="firstVisitDate" 
-                  label="First Visit" 
-                  currentSortField={sortField as string} 
-                  currentSortOrder={sortOrder} 
-                  onSort={handleSort} 
-                  style={COL_HEADER} 
+                <SortableHeader
+                  field="firstVisitDate"
+                  label="First Visit"
+                  currentSortField={sortField as string}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                  style={COL_HEADER}
                 />
-                <SortableHeader 
-                  field="lastVisitDate" 
-                  label="Last Visit" 
-                  currentSortField={sortField as string} 
-                  currentSortOrder={sortOrder} 
-                  onSort={handleSort} 
-                  style={COL_HEADER} 
+                <SortableHeader
+                  field="lastVisitDate"
+                  label="Last Visit"
+                  currentSortField={sortField as string}
+                  currentSortOrder={sortOrder}
+                  onSort={handleSort}
+                  style={COL_HEADER}
                 />
                 <th scope="col" style={COL_HEADER}>Assigned Doctor</th>
                 <th scope="col" style={{ ...COL_HEADER, width: "3rem", textAlign: "center" }}>Actions</th>
@@ -219,8 +219,8 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
                         aria-label="Edit patient"
                       >
                         <svg
-                          width="12"
-                          height="12"
+                          width="24"
+                          height="24"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
