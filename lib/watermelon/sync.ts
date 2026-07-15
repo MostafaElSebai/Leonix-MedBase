@@ -24,7 +24,7 @@ export async function sync() {
     console.log("Sync already in progress. Skipping concurrent request.");
     return;
   }
-  
+
   try {
     isSyncing = true;
     // Prevent sync from starting if we are in "Lie-Fi" or offline
@@ -80,7 +80,7 @@ export async function sync() {
       //   migrationsEnabledAtVersion: 1, 
     });
 
-    console.log('Sync completed successfully!');
+    console.log('Sync completed successfully!!!!');
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('watermelon-sync-complete'));
     }
