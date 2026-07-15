@@ -52,8 +52,12 @@ export function AppHeaderBar({
       if (newWorker) {
         newWorker.addEventListener("statechange", () => {
           if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-            setUpdateAvailable(true);
-            setRegistration(reg);
+            // Only show the update prompt if running as an installed PWA (standalone mode)
+            const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
+            if (isStandalone) {
+              setUpdateAvailable(true);
+              setRegistration(reg);
+            }
           }
         });
       }
@@ -62,8 +66,11 @@ export function AppHeaderBar({
     navigator.serviceWorker.getRegistration().then((reg) => {
       if (!reg) return;
       if (reg.waiting) {
-        setUpdateAvailable(true);
-        setRegistration(reg);
+        const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
+        if (isStandalone) {
+          setUpdateAvailable(true);
+          setRegistration(reg);
+        }
       }
       reg.addEventListener("updatefound", () => onUpdateFound(reg));
     });

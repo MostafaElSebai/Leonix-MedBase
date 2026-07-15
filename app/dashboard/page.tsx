@@ -109,7 +109,7 @@ export default function DashboardPage() {
             onChange={handleSearch2}
             placeholder="Filter results further..."
           />
-          <DateFilter 
+          <DateFilter
             value={dateFilter}
             onChange={setDateFilter}
           />
