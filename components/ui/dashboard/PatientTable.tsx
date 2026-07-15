@@ -219,8 +219,8 @@ export function PatientTable({ patients, onDelete }: PatientTableProps) {
                         aria-label="Edit patient"
                       >
                         <svg
-                          width="24"
-                          height="24"
+                          width="12"
+                          height="12"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"

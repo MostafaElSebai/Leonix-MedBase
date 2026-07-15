@@ -40,7 +40,7 @@ export function AppHeaderBar({
   const { doctor, loading } = useCurrentDoctor();
 
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -56,7 +56,7 @@ export function AppHeaderBar({
             const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
             if (isStandalone) {
               setUpdateAvailable(true);
-              setRegistration(reg);
+              setWaitingWorker(newWorker);
             }
           }
         });
@@ -69,7 +69,7 @@ export function AppHeaderBar({
         const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
         if (isStandalone) {
           setUpdateAvailable(true);
-          setRegistration(reg);
+          setWaitingWorker(reg.waiting);
         }
       }
       reg.addEventListener("updatefound", () => onUpdateFound(reg));
@@ -85,8 +85,8 @@ export function AppHeaderBar({
   }, []);
 
   const handleInstallUpdate = () => {
-    if (registration?.waiting) {
-      registration.waiting.postMessage({ type: "SKIP_WAITING" });
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
     }
   };
 
